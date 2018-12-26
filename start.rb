@@ -22,4 +22,6 @@ post '/accounts/new/' do
 	
 	request.body.rewind
     data = JSON.parse(request.body.read)
+    
+    return {}
 end
