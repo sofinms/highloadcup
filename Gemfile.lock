@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     backports (3.11.4)
+    database_cleaner (1.7.0)
     multi_json (1.13.1)
     mustermann (1.0.3)
     mysql2 (0.5.2)
@@ -9,6 +10,7 @@ GEM
     rack (2.0.6)
     rack-protection (2.0.5)
       rack
+    rake (12.3.2)
     sequel (5.15.0)
     sinatra (2.0.5)
       mustermann (~> 1.0)
@@ -28,8 +30,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  database_cleaner
   mysql2
   puma
+  rake
   sequel
   sinatra
   sinatra-contrib
