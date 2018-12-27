@@ -1,6 +1,7 @@
 mysql:
     adapter: :mysql2
     host: 'localhost'
+    port: nil
     database: 'highloadcup'
     username: 'highloadcup'
     password: ''
