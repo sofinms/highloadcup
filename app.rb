@@ -46,18 +46,18 @@ post '/accounts/new/' do
 			end
 	    end
     rescue Sequel::UniqueConstraintViolation
-		@db.disconnect
+		DB.disconnect
 		status 400
 		content_type :json
 		return {}.to_json
 		
 	rescue
-		@db.disconnect
+		DB.disconnect
 		status 400
 		content_type :json
 		return {}.to_json
 	end
-    @db.disconnect
+    DB.disconnect
 
     json {}
 end
