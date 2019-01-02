@@ -59,5 +59,59 @@ post '/accounts/new/' do
 	end
     DB.disconnect
 
-    json {}
+    status 200
+	content_type :json
+	return {}.to_json
+end
+
+
+post '/accounts/:id/' do
+	request.body.rewind
+    account = JSON.parse(request.body.read)
+    account_id = DB["SELECT id FROM accounts WHERE id = ?", params['id']].first[:id] rescue nil
+    if account_id == nil
+	    DB.disconnect
+		status 404
+		content_type :json
+		return {}.to_json
+	end
+	begin
+		interests = nil
+		likes = nil
+		if account.key?("interests")
+			interests = account['interests']
+			account.delete('interests')
+		end
+		if account.key?("likes")
+			likes = account['likes']
+			account.delete('likes')
+		end
+		DB[:accounts].where(:id => params['id']).update(account)
+		if interests
+			DB[:account_interests].where(:account_id => params['id']).delete
+			interests.each do |interest|
+				interest_id = DB["SELECT id FROM interests WHERE value LIKE ?", interest].first[:id] rescue nil
+				if interest_id.nil?
+					interest_id = DB[:interests].insert('value' => interest)
+				end
+				DB[:account_interests].insert('account_id' => params["id"], 'interest_id' => interest_id)
+			end
+		end
+		if likes
+			DB[:account_likes].where(:from_account_id => params["id"]).delete
+			likes.each do |like|
+				DB[:account_likes].insert('id' => like["id"], 'from_account_id' => params["id"], 'ts' => like["ts"])
+			end
+		end
+	rescue
+		DB.disconnect
+		status 400
+		content_type :json
+		return {}.to_json
+	end
+    DB.disconnect
+
+    status 200
+	content_type :json
+	return {}.to_json
 end
