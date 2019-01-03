@@ -67,15 +67,16 @@ end
 
 post '/accounts/:id/' do
 	request.body.rewind
-    account = JSON.parse(request.body.read)
-    account_id = DB["SELECT id FROM accounts WHERE id = ?", params['id']].first[:id] rescue nil
-    if account_id == nil
-	    DB.disconnect
-		status 404
-		content_type :json
-		return {}.to_json
-	end
 	begin
+	    account = JSON.parse(request.body.read)
+	    account_id = DB["SELECT id FROM accounts WHERE id = ?", params['id']].first[:id] rescue nil
+	    if account_id == nil
+		    DB.disconnect
+			status 404
+			content_type :json
+			return {}.to_json
+		end
+	
 		interests = nil
 		likes = nil
 		if account.key?("interests")
@@ -114,4 +115,27 @@ post '/accounts/:id/' do
     status 200
 	content_type :json
 	return {}.to_json
+end
+
+post '/accounts/likes/' do
+	request.body.rewind
+	begin
+    	likes = JSON.parse(request.body.read)
+    	DB.transaction do
+			likes['likes'].each do |like|
+		    	if like.keys.count != 3 or !like.key?("likee") or !like.key?("ts") or !like.key?("liker")
+			    	DB.disconnect
+					status 400
+					content_type :json
+					return {}.to_json
+			    end
+			    DB[:account_likes].insert('id' => like["likee"], 'from_account_id' => like["liker"], 'ts' => like["ts"])
+		    end
+		end
+    rescue
+    	DB.disconnect
+		status 400
+		content_type :json
+		return {}.to_json
+    end
 end
